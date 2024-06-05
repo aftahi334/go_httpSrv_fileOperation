@@ -21,10 +21,17 @@ func getRoot(w http.ResponseWriter, r *http.Request) {
 	hasSecond := r.URL.Query().Has("second")
 	second := r.URL.Query().Get("second")
 
-	fmt.Printf("%s: got / request. first(%t)=%s, second(%t)=%s\n",
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		fmt.Printf("could not read body: %s\n", err)
+	}
+
+	fmt.Printf("%s: got / request. first(%t)=%s, second(%t)=%s, body:\n%s\n",
 		ctx.Value(keyServAddr),
 		hasFirst, first,
-		hasSecond, second)
+		hasSecond, second,
+		body,
+	)
 
 	io.WriteString(w, "This is my website!\n")
 }
@@ -34,6 +41,8 @@ func getHello(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("%s: got /hello request\n", ctx.Value(keyServAddr))
 	io.WriteString(w, "Hello HTTP!\n")
 }
+
+// to test: curl -X POST -d 'This is the body' 'http://localhost:3333?first=1&second='
 func main() {
 
 	mux := http.NewServeMux()
